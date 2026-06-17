@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#8c4a30" />
+  <meta name="description" content="一部没有主角立绘的视觉小说。" />
+  <title>栖式特调</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='28' text-anchor='middle' x='16'%3E%F0%9F%8D%AD%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <div id="game">
+    <!-- 背景层 -->
+    <div id="bg"></div>
+
+    <!-- 章节转场遮罩（黑色淡出淡入层） -->
+    <div id="transitionOverlay"></div>
+
+    <!-- 章节小标签 -->
+    <div id="tag"></div>
+
+    <!-- 顶部菜单（存档 / 读档 / 章节 / 自动 / 音效 / 标题） -->
+    <div id="menuBar">
+      <button class="menu-btn" data-action="save">存档</button>
+      <button class="menu-btn" data-action="load">读档</button>
+      <button class="menu-btn" data-action="chapters">章节</button>
+      <button class="menu-btn" data-action="auto">自动</button>
+      <button class="menu-btn active" id="btnVoiceSound" data-action="voice">声音</button>
+      <button class="menu-btn" data-action="title">标题</button>
+    </div>
+
+    <!-- 角色立绘（左 / 中 / 右） -->
+    <img id="charLeft" class="character" alt="" />
+    <img id="charCenter" class="character" alt="" />
+    <img id="charRight" class="character" alt="" />
+
+    <!-- CG 全屏层（相片样式） -->
+    <div id="cgOverlay" class="panel-overlay">
+      <div class="cg-frame">
+        <img id="cgImage" class="cg-photo" alt="CG" />
+        <div id="cgCaption"></div>
+      </div>
+    </div>
+
+    <!-- CG 过场动画字幕层（Mode 3: cg_seq） -->
+    <div id="cgSeqSubtitle">
+      <div id="cgSeqSpeaker"></div>
+      <div id="cgSeqText"></div>
+    </div>
+
+    <!-- 对话框 -->
+    <div id="dialogueBox">
+      <div id="speaker"></div>
+      <div id="text"></div>
+      <button id="nextBtn">继续</button>
+    </div>
+
+    <!-- 选项层 -->
+    <div id="choices"></div>
+
+    <!-- 结局画面 -->
+    <div id="endingScreen" class="panel-overlay">
+      <h1 id="endingTitle"></h1>
+      <p id="endingText"></p>
+      <p id="endingBonus"></p>
+      <div class="ending-actions"></div>
+    </div>
+
+    <!-- 标题画面 -->
+    <div id="titleScreen">
+      <div class="title-kicker">未署名毕业册 · 校园篇</div>
+      <h1 class="title-main">栖式特调</h1>
+      <p class="title-copy">
+        樱花落尽的四月，四个人从不同的方向注视着同一个人。<br />
+        糖纸、豆浆、雨伞、试卷——他们把这些碎片，一张张贴进毕业册。
+      </p>
+      <div class="title-actions">
+        <button id="btnNew" class="primary-btn">新的开始</button>
+        <button id="btnContinue" class="ghost-btn" style="display:none;">继续阅读</button>
+        <button id="btnChapters" class="ghost-btn">章节回顾</button>
+        <button id="btnChildTheater" class="ghost-btn" style="display:none;">童年篇</button>
+        <button id="btnAbout" class="ghost-btn">关于本作</button>
+      </div>
+    </div>
+
+    <!-- 存档 / 读档 面板 -->
+    <div id="savePanel" class="panel-overlay">
+      <div class="panel-card">
+        <h2>存 档</h2>
+        <div id="saveSlots"></div>
+        <button class="panel-close">关闭</button>
+      </div>
+    </div>
+
+    <div id="loadPanel" class="panel-overlay">
+      <div class="panel-card">
+        <h2>读 档</h2>
+        <div id="loadSlots"></div>
+        <button class="panel-close">关闭</button>
+      </div>
+    </div>
+
+    <!-- 章节回顾面板（高中篇 · 本子风格 · 可翻页） -->
+    <div id="chapterPanel" class="panel-overlay">
+      <div class="book-wrapper">
+        <button class="book-flip book-flip-prev" id="chapterFlipPrev" aria-label="上一页">‹</button>
+        <div class="chapter-book">
+          <div class="chapter-book-spine"></div>
+          <div class="chapter-book-page chapter-book-left">
+            <div class="chapter-kicker">Chapter Archive</div>
+            <h2 class="chapter-book-title">高 中 篇</h2>
+            <p class="chapter-book-note">
+              高中三年的故事碎片，<br />
+              被折进糖纸、写在伞面、贴进毕业册。<br />
+              选择一位同学，进入属于你们的那一页。
+            </p>
+            <div class="child-polaroid chapter-polaroid">
+              <img id="chapterPolaroidPhoto" src="" alt="高中照片" onerror="this.style.display='none';" />
+              <span id="chapterPolaroidCaption">林栖的高中生活</span>
+            </div>
+            <div class="child-stats chapter-stats">
+              <div><span class="child-stats-label">章节</span><span id="chapterStatsTotal">12</span></div>
+              <div><span class="child-stats-label">已读</span><span id="chapterStatsRead">0</span></div>
+              <div><span class="child-stats-label">主角</span><span>林栖 · 高中三年</span></div>
+            </div>
+          </div>
+          <div class="chapter-book-page chapter-book-right">
+            <div class="chapter-index-title">目 录</div>
+            <div id="chapterList" class="chapter-index-list"></div>
+            <div id="chapterPageText" class="chapter-page-indicator">01 / 01</div>
+            <button class="panel-close chapter-book-close">合上本子</button>
+          </div>
+        </div>
+        <button class="book-flip book-flip-next" id="chapterFlipNext" aria-label="下一页">›</button>
+      </div>
+    </div>
+
+    <!-- 童年篇小剧场目录（通关真结局后解锁） -->
+    <div id="childTheaterPanel" class="panel-overlay">
+      <div class="book-wrapper">
+        <button class="book-flip book-flip-prev" id="childPrev" aria-label="上一页" disabled>‹</button>
+        <div class="child-book">
+          <div class="child-book-spine"></div>
+          <div class="child-book-page child-book-left">
+            <div class="child-kicker">After Story Archive</div>
+            <h2>童 年 篇 小 剧 场</h2>
+            <p class="child-note">
+              这里记录着林栖在小学一、二年级时的故事。<br />
+              糖盒、薄荷糖、柠檬糖、灰鸽娃偶、彩虹流苏——<br />
+              一切的起源，都从这几页旧照片开始。
+            </p>
+            <div class="child-polaroid">
+              <img id="childPolaroidPhoto" src="" alt="童年照片" onerror="this.style.display='none';" />
+              <span id="childPolaroidCaption">小林栖的第一张照片</span>
+            </div>
+            <div class="child-stats">
+              <div><span class="child-stats-label">章节</span><span id="childStatsTotal">7</span></div>
+              <div><span class="child-stats-label">已读</span><span id="childStatsRead">0</span></div>
+              <div><span class="child-stats-label">主角</span><span>小林栖 · 6岁</span></div>
+            </div>
+          </div>
+          <div class="child-book-page child-book-right">
+            <div class="child-index-title">目录</div>
+            <div id="childChapterList">
+              <!-- 章节列表由 JavaScript 动态生成 -->
+            </div>
+            <div id="childPageText" class="chapter-page-indicator">01 / 01</div>
+            <button class="panel-close child-close" id="childTheaterClose">合上本子</button>
+          </div>
+        </div>
+        <button class="book-flip book-flip-next" id="childNext" aria-label="下一页">›</button>
+      </div>
+    </div>
+
+    <!-- 相册书 / 毕业册：左页关于本作，右页 CG 图（通关后才能翻页） -->
+    <div id="galleryPanel" class="panel-overlay">
+      <div class="book-wrapper">
+        <button class="book-flip book-flip-prev" id="galleryPrev" aria-label="上一页">‹</button>
+        <div class="gallery-book">
+          <div class="gallery-book-spine"></div>
+          <div class="gallery-book-page gallery-book-left">
+            <div style="font-size:11px; letter-spacing:5px; color:#a46b45; text-transform:uppercase; margin-bottom:18px;">About &amp; Archive</div>
+            <h2 style="font-size:24px; letter-spacing:14px; font-weight:500; color:#5d3d26; margin:0 0 22px 0; padding-left:14px;">栖 式 特 调</h2>
+            <div style="height:1px; background:linear-gradient(90deg, rgba(120,74,42,0.35), transparent); width:70%; margin-bottom:20px;"></div>
+            <p style="font-size:12px; letter-spacing:2px; color:#6b4a2b; line-height:1.9; margin:0 0 10px 0;">
+              一部没有主角立绘的视觉小说。
+            </p>
+            <p style="font-size:12px; letter-spacing:2px; color:#6b4a2b; line-height:1.9; margin:0 0 10px 0;">
+              玩家以四位不同同学的视角，观察同一个男生。
+            </p>
+            <p style="font-size:12px; letter-spacing:2px; color:#6b4a2b; line-height:1.9; margin:0;">
+              他在糖纸背面写下字，在伞沿下低头看雨，把试卷折成纸玫瑰。
+            </p>
+            <p style="font-size:11px; letter-spacing:3px; color:#8c4a30; margin-top:24px; line-height:1.8;">
+              共通线 · 4 条角色路线 · 1 个真终章
+            </p>
+            <p id="galleryPageNum" style="font-size:11px; letter-spacing:4px; color:#8c4a30; margin-top:16px;">
+              ——
+            </p>
+          </div>
+          <div class="gallery-book-page gallery-book-right" style="display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative;">
+            <!-- 未通关：占位符 -->
+            <div id="galleryLocked" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; width:100%; height:100%;">
+              <p style="font-size:13px; letter-spacing:3px; color:#6b4a2b; line-height:2; margin:0 0 10px 0;">
+                毕业册尚未开启。
+              </p>
+              <p style="font-size:12px; letter-spacing:2px; color:#9c7a56; line-height:1.9; margin:0;">
+                当你走完所有故事，<br />这里会变成一本可以翻阅的相册。
+              </p>
+            </div>
+            <!-- 通关后：CG 图占满右页（默认隐藏，JS 显示） -->
+            <div id="galleryImgWrap" style="display:none; flex:1; width:100%; flex-direction:column; justify-content:center; align-items:center;">
+              <img id="galleryImage" style="max-width:100%; max-height:78%; object-fit:contain; box-shadow:0 8px 32px rgba(0,0,0,0.28); background:#fff; border:1px solid rgba(120,74,42,0.25);" alt="CG" />
+              <p id="galleryCaption" style="font-size:12px; letter-spacing:4px; color:#6b4a2b; margin-top:12px; text-align:center;"></p>
+            </div>
+            <button class="panel-close chapter-book-close" style="margin-top:14px; padding:6px 22px; font-size:11px; letter-spacing:4px;">合上本子</button>
+          </div>
+        </div>
+        <button class="book-flip book-flip-next" id="galleryNext" aria-label="下一页">›</button>
+      </div>
+    </div>
+
+    <!-- ===== 小游戏面板（井字棋 / 五子棋 / 贪吃蛇）===== -->
+    <div id="miniGamePanel" class="panel-overlay">
+      <div class="panel-card mg-card">
+        <div id="mgHeader">
+          <h2 id="mgTitle">小游戏</h2>
+          <p id="mgDesc"></p>
+        </div>
+        <div id="mgOpponent">
+          <!-- 对手立绘 / 角色信息，由引擎动态填充 -->
+        </div>
+        <div id="mgStage"></div>   <!-- 棋盘 / 游戏舞台 -->
+        <div id="mgFooter">
+          <div id="mgStatus"></div>
+          <div id="mgButtons"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 顶部 toast 提示 -->
+    <div id="toast"></div>
+
+    <!-- BGM 音频元素 -->
+    <audio id="bgmPlayer" loop preload="auto"></audio>
+  </div>
+
+  <!-- 动态加载所有脚本（带时间戳避免缓存） -->
+  <script>
+    (function() {
+      var v = Date.now(); // 版本时间戳
+      var scripts = [
+        "js/assets.js",
+        "js/voice_profiles.js",
+        "js/story/_registry.js",
+        "js/story/prologue.js",
+        "js/story/common_01.js",
+        "js/story/common_02.js",
+        "js/story/chap_03_march.js",
+        "js/story/common_04.js",
+        "js/story/common_05.js",
+        "js/story/chap_06_june.js",
+        "js/story/common_07.js",
+        "js/story/chap_08_august.js",
+        "js/story/common_09.js",
+        "js/story/chap_10_october.js",
+        "js/story/common_11.js",
+        "js/story/common_12.js",
+        "js/story/common_split.js",
+        "js/story/route_shiraishi.js",
+        "js/story/route_sato.js",
+        "js/story/route_saionji.js",
+        "js/story/route_mizuno.js",
+        "js/story/finale.js",
+        // 童年篇章节（通关后解锁，可独立阅读）
+        "js/story/childhood/_registry.js",
+        "js/story/childhood/childhood_01_rainbow.js",
+        "js/story/childhood/childhood_02_tears.js",
+        "js/story/childhood/childhood_03_silverwing.js",
+        "js/story/childhood/childhood_04_enamel.js",
+        "js/story/childhood/childhood_05_rooster.js",
+        "js/story/childhood/childhood_end.js",
+        "js/story/childhood/childhood_side01_candybox.js",
+        "js/story/childhood/childhood_side02_lemon.js",
+        "js/story/childhood/childhood_side03_plane.js",
+        "js/story/childhood/childhood_side04_button.js",
+        "js/story/childhood/story.js",
+        "js/main.js"
+      ];
+      var i = 0;
+      function loadNext() {
+        if (i >= scripts.length) return;
+        var s = document.createElement("script");
+        s.src = scripts[i] + "?v=" + v;
+        s.onload = function() { i++; loadNext(); };
+        s.onerror = function() { i++; loadNext(); };
+        document.body.appendChild(s);
+      }
+      loadNext();
+    })();
+
+    // 注册 Service Worker (PWA 离线缓存)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./sw.js')
+          .then(function(registration) {
+            console.log('PWA 缓存注册成功:', registration.scope);
+          })
+          .catch(function(err) {
+            console.log('PWA 缓存注册失败:', err);
+          });
+      });
+    }
+  </script>
+</body>
+</html>
