@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>栖式特调 · 测试工具</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #1a0f0a 0%, #2d1810 50%, #3d2817 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container { max-width: 500px; width: 100%; text-align: center; }
+    .title { font-size: 2em; margin-bottom: 6px; color: #d48a6a; letter-spacing: 6px; }
+    .subtitle { font-size: 0.9em; color: #a4714d; margin-bottom: 36px; letter-spacing: 2px; }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 16px 24px;
+      margin: 12px 0;
+      font-size: 1em;
+      font-weight: 500;
+      color: #fff;
+      background: linear-gradient(135deg, #8c4a30, #d48a6a);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(140, 74, 48, 0.4);
+      letter-spacing: 3px;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(140, 74, 48, 0.5); }
+    .btn:active { transform: scale(0.98); }
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid rgba(212, 138, 106, 0.4);
+      color: #d48a6a;
+      box-shadow: none;
+    }
+    .btn-secondary:hover { background: rgba(212, 138, 106, 0.1); }
+    .btn-green {
+      background: linear-gradient(135deg, #5a9e4b, #7ec46a);
+      box-shadow: 0 4px 16px rgba(90, 158, 75, 0.4);
+    }
+    .btn-red {
+      background: linear-gradient(135deg, #8c3030, #d46a6a);
+      box-shadow: 0 4px 16px rgba(140, 48, 48, 0.4);
+    }
+    .hint { margin-top: 28px; font-size: 0.8em; color: #6a4a2a; line-height: 1.8; }
+    .footer { margin-top: 30px; font-size: 0.7em; color: #5a3a1a; }
+    .sep { margin: 24px 0; border: none; border-top: 1px solid rgba(212, 138, 106, 0.2); }
+    .label { font-size: 0.75em; color: #8a5a3a; letter-spacing: 2px; margin-bottom: 8px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">测试工具</h1>
+    <p class="subtitle">栖式特调 · URL参数解锁</p>
+
+    <p class="label">解锁模式</p>
+    <a href="index.html?test=unlockAll" class="btn">一键解锁全部内容</a>
+    <a href="index.html?test=childhood" class="btn btn-secondary">仅解锁童年篇</a>
+    <a href="index.html?test=finale" class="btn btn-secondary">仅解锁真终章</a>
+
+    <hr class="sep" />
+
+    <p class="label">正常进入（无参数）</p>
+    <a href="index.html" class="btn btn-green">进入游戏（正常模式）</a>
+
+    <hr class="sep" />
+
+    <p class="label">重置进度（进入后需手动"新的开始"初始化）</p>
+    <a href="index.html" class="btn btn-red" onclick="resetAll(event)">重置全部进度并进入游戏</a>
+
+    <div class="hint">
+      使用说明：<br>
+      1. 点击按钮直接进入游戏<br>
+      2. 解锁模式通过URL参数实现，无需localStorage跨页传值<br>
+      3. 解锁后会自动保存进度到localStorage<br>
+      4. 下次直接打开 index.html（无参数）即可看到已解锁内容
+    </div>
+
+    <p class="footer">开发工具 · 请勿在正式版本中使用</p>
+  </div>
+
+  <script>
+    function resetAll(e) {
+      e.preventDefault();
+      try {
+        localStorage.removeItem("qi_shi_te_tiao_auto");
+        localStorage.removeItem("qi_shi_te_tiao_child_theater_unlocked");
+        for (var i = 1; i <= 3; i++) {
+          localStorage.removeItem("qi_shi_te_tiao_save:" + i);
+        }
+        localStorage.removeItem("qi_shi_te_tiao_childhood_progress");
+      } catch (err) {}
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>
